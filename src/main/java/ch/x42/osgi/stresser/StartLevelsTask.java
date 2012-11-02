@@ -1,5 +1,9 @@
 package ch.x42.osgi.stresser;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
@@ -10,7 +14,8 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
     int counter;
     private final StartLevel startLevel;
     private int currentStartLevel = -1;
-    private final long LEVEL_WAIT_MSEC = 5000;
+    private final long LEVEL_WAIT_MSEC = 10000;
+    private final List<Integer> levels = new ArrayList<Integer>();
     
     StartLevelsTask(BundleContext bundleContext) {
         super("sl", bundleContext);
@@ -26,9 +31,8 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
     }
     
     protected void runOneCycle() {
-        log.info("Running cycle {}", ++counter);
+        log.info("Running cycle {}, will set start levels {}", ++counter, levels);
         
-        final int [] levels = { 8, 12, 7, 14, 30 };
         for(int level : levels) {
             log.info("Setting start level {} and waiting up to {} msec to see it", level, LEVEL_WAIT_MSEC);
             startLevel.setStartLevel(level);
@@ -36,9 +40,27 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
             while(currentStartLevel != level && System.currentTimeMillis() < end) {
                 waitMsec(100);
             }
-            if(currentStartLevel != level) {
+            if(currentStartLevel == level) {
+                log.info("Start level is now {}", currentStartLevel);
+            } else {
                 log.warn("Failed to set start level {}, current level={}", level, currentStartLevel);
             }
+        }
+    }
+    
+    protected void processCommand(String [] cmd, PrintWriter out) {
+        super.processCommand(cmd, out);
+        if(cmd.length > 2) {
+            levels.clear();
+            for(int i=2; i < cmd.length; i++) {
+                final String val = cmd[i];
+                try {
+                    levels.add(Integer.parseInt(val));
+                } catch(NumberFormatException nfe) {
+                    out.println("Invalid start level '" + val + "', should be an Integer");
+                }
+            }
+            out.println("List of start levels set to " + levels);
         }
     }
 

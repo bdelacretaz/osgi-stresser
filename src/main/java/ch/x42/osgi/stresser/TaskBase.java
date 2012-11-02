@@ -60,7 +60,7 @@ public abstract class TaskBase implements Runnable {
         return thread;
     }
     
-    void processCommand(String [] cmd, PrintWriter out) {
+    protected void processCommand(String [] cmd, PrintWriter out) {
         final String verb = cmd.length >= 2 ? cmd[1] : "MISSING_VERB";
         if(verb.equals("r")) {
             setState(STATE.running);
