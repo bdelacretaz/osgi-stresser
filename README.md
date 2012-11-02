@@ -12,25 +12,29 @@ when changing start levels.
 Connect to localhost:1234 to use the command interface. Port number can
 be set via a system property, see source code.
 
-A simplistic command interpreter is provided, examples commands:
+A simplistic command interpreter is provided, see example commands below.
 
-## bu o
+The stress testing tasks log what they are doing, at the INFO level.
+
+## Commands
+
+### bu o
 Starts the "bundles" task in one shot mode: one cycle is executed, where
 a semi-random set of bundles is stopped and restarted.
 
-## bu r
+### bu r
 Run the "bundles" task continuously.
 
-## bu p
+### bu p
 Pause the "bundles" task at the end of the next cycle.
 
-## sl o 12 5 42 9 30
+### sl o 12 5 42 9 30
 Runs one cycle of the "start levels" task, setting start levels from 12 to 30
 in sequence as specified.
 
-## sl o
+### sl o
 Runs one cycle of the "start levels" task, reusing the same start levels sequence
 as last time.
 
-## sl r and sl p
+### sl r and sl p
 Run and pause the start levels task. 
