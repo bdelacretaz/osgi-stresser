@@ -34,7 +34,8 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
         log.info("Running cycle {}, will set start levels {}", ++counter, levels);
         
         for(int level : levels) {
-            log.info("Setting start level {} and waiting up to {} msec to see it", level, LEVEL_WAIT_MSEC);
+            log.info("Setting start level {} (from {}) and waiting up to {} msec to see it", 
+                    new Object[] { level, currentStartLevel, LEVEL_WAIT_MSEC });
             startLevel.setStartLevel(level);
             final long end = System.currentTimeMillis() + LEVEL_WAIT_MSEC;
             while(currentStartLevel != level && System.currentTimeMillis() < end) {

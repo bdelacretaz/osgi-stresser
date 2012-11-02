@@ -34,3 +34,10 @@ as last time.
 
 ## sl r and sl p
 Run and pause the start levels task. 
+
+## up r -500
+Run the "bundle upgrade" task continuously, waiting up to 500 msec between 
+cycles.
+
+## up o and up p
+Run one cycle and pause the bundle ugprade task.

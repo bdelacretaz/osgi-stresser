@@ -7,7 +7,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.BundleActivator;
@@ -22,6 +24,7 @@ public class Activator implements BundleActivator, Runnable {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<String, TaskBase> tasks = new HashMap<String, TaskBase>();
     private ServerSocket commandSocket;
+    private Socket clientSocket;
     private Thread commandThread;
     private boolean active;
     
@@ -31,10 +34,12 @@ public class Activator implements BundleActivator, Runnable {
     @Override
     public void start(BundleContext context) throws Exception {
         tasks.clear();
+        closeSockets();
         
         final TaskBase [] tt = {
                 new BundlesStartStopTask(context),
-                new StartLevelsTask(context)
+                new StartLevelsTask(context),
+                new BundleUpdateTask(context)
         };
         for(TaskBase t : tt) {
             tasks.put(t.getTaskName(), t);
@@ -51,6 +56,7 @@ public class Activator implements BundleActivator, Runnable {
         
         log.info("Stopping command thread");
         active=false;
+        closeSockets();
         commandThread.interrupt();
         commandThread.join(JOIN_TIMEOUT_MSEC);
         checkNotAlive(commandThread);
@@ -60,6 +66,22 @@ public class Activator implements BundleActivator, Runnable {
             t.setState(STATE.stopped);
             t.getThread().join(JOIN_TIMEOUT_MSEC);
             checkNotAlive(t.getThread());
+        }
+    }
+    
+    private void closeSockets() {
+        try {
+            if(clientSocket != null) {
+                clientSocket.close();
+            }
+        } catch(IOException ignore) {
+        }
+        
+        try {
+            if(commandSocket != null) {
+                commandSocket.close();
+            }
+        } catch(IOException ignore) {
         }
     }
     
@@ -75,12 +97,25 @@ public class Activator implements BundleActivator, Runnable {
         log.info("Processing command '{}'", cmd);
         final String [] words = cmd.split(" ");
         if(words.length >= 1) {
-            final TaskBase t = tasks.get(words[0]);
-            if(t==null) {
-                out.println("Task not found: " + words[0]);
+            final String task = words[0];
+            if("*".equals(task)) {
+                for(TaskBase t : tasks.values()) {
+                    t.processCommand(words, out);
+                }
             } else {
-                t.processCommand(words, out);
+                final TaskBase t = tasks.get(task);
+                if(t==null) {
+                    out.println("Task not found: " + words[0]);
+                } else {
+                    t.processCommand(words, out);
+                }
             }
+            
+            for(TaskBase tt : tasks.values()) {
+                out.println(tt + " state=" + tt.getState());
+            }
+        } else {
+            out.println("Empty command, cannot process");
         }
     }
     
@@ -88,12 +123,11 @@ public class Activator implements BundleActivator, Runnable {
         try {
             commandSocket = new ServerSocket(COMMAND_PORT);
             while(active) {
-                Socket s = null;
                 try {
-                    s = commandSocket.accept();
-                    final BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    final PrintWriter w = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
-                    while(true) {
+                    clientSocket = commandSocket.accept();
+                    final BufferedReader r = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    final PrintWriter w = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                    while(active) {
                         w.write("OSGI stresser> ");
                         w.flush();
                         final String cmd = r.readLine();
@@ -105,25 +139,20 @@ public class Activator implements BundleActivator, Runnable {
                     }
                 } catch(IOException ioe) {
                     log.error("Exception in run()", ioe);
+                    break;
                 } finally {
                     try {
-                        if(s != null) {
-                            s.close();
+                        if(clientSocket != null) {
+                            clientSocket.close();
                         }
-                    } catch(IOException ioe) {
-                        log.error("Error closing command socket", ioe);
+                    } catch(IOException ignore) {
                     }
                 }
             }
         } catch(IOException ioe) {
             log.error("Unable to open command socket on port " + COMMAND_PORT, ioe);
         } finally {
-            if(commandSocket != null) {
-                try {
-                    commandSocket.close();
-                } catch(IOException ignore) {
-                }
-            }
+            closeSockets();
         }
     }
 }

@@ -52,6 +52,10 @@ public abstract class TaskBase implements Runnable {
         }
     }
     
+    STATE getState() {
+        return state;
+    }
+    
     String getTaskName() {
         return taskName;
     }
@@ -71,7 +75,6 @@ public abstract class TaskBase implements Runnable {
         } else {
             out.println("Unknown command verb: " + verb);
         }
-        out.println(this + " state=" + state);
     }
     
     public final void run() {
