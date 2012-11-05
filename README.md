@@ -20,7 +20,8 @@ The stress testing tasks log what they are doing, at the INFO level.
 
 ### bu o
 Starts the "bundles" task in one shot mode: one cycle is executed, where
-a semi-random set of bundles is stopped and restarted.
+a semi-random set of bundles is stopped and restarted. Framework and other
+critical bundles are not touched, see source code for details.
 
 ### bu r
 Run the "bundles" task continuously.
