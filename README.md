@@ -9,7 +9,7 @@ Usage
 Install this bundle at a low start level, so that it doesn't stop itself
 when changing start levels.
 
-Connect to localhost:1234 to use the command interface. Port number can
+Use telnet to connect to localhost:1234 to use the command interface. Port number can
 be set via a system property, see source code.
 
 A simplistic command interpreter is provided, see example commands below.
