@@ -7,9 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.BundleActivator;
@@ -39,7 +37,8 @@ public class Activator implements BundleActivator, Runnable {
         final TaskBase [] tt = {
                 new BundlesStartStopTask(context),
                 new StartLevelsTask(context),
-                new BundleUpdateTask(context)
+                new BundleUpdateTask(context),
+                new RefreshPackagesTask(context)
         };
         for(TaskBase t : tt) {
             tasks.put(t.getTaskName(), t);
