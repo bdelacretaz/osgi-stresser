@@ -38,7 +38,8 @@ public class Activator implements BundleActivator, Runnable {
                 new BundlesStartStopTask(context),
                 new StartLevelsTask(context),
                 new BundleUpdateTask(context),
-                new RefreshPackagesTask(context)
+                new RefreshPackagesTask(context),
+                new StopSingleBundleTask(context)
         };
         for(TaskBase t : tt) {
             tasks.put(t.getTaskName(), t);
