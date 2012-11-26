@@ -39,7 +39,7 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
             startLevel.setStartLevel(level);
             final long end = System.currentTimeMillis() + LEVEL_WAIT_MSEC;
             while(currentStartLevel != level && System.currentTimeMillis() < end) {
-                waitMsec(100);
+                waiter.waitMsec(100);
             }
             if(currentStartLevel == level) {
                 log.info("Start level is now {}", currentStartLevel);

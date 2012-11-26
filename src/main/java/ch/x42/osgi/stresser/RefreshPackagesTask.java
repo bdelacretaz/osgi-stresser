@@ -3,45 +3,19 @@ package ch.x42.osgi.stresser;
 import java.io.PrintWriter;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 
-public class RefreshPackagesTask extends TaskBase implements FrameworkListener {
-    private int counter;
-    private int refreshCount;
+public class RefreshPackagesTask extends TaskBase{
     private long waitMsec = 5000;
+    public static final long REFRESH_TIMEOUT_MSEC = 10000L;
+    private final PackagesRefresher refresher; 
     
     RefreshPackagesTask(BundleContext bundleContext) {
         super("rp", bundleContext);
-        bundleContext.addFrameworkListener(this);
+        refresher = new PackagesRefresher(bundleContext);
     }
     
     protected void runOneCycle() {
-        PackageAdmin packageAdmin = null;
-        final ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
-        if(ref == null) {
-            log.warn("StartLevel service not found");
-            return;
-        } else {
-            packageAdmin = (PackageAdmin)bundleContext.getService(ref);
-        }
-        
-        log.info("Running cycle {}, refreshing packages", ++counter);
-        final int oldRefreshCount = refreshCount;
-        packageAdmin.refreshPackages(null);
-        
-        final long end = System.currentTimeMillis() + waitMsec;
-        while(refreshCount == oldRefreshCount && System.currentTimeMillis() < end) {
-            waitMsec(100);
-        }
-        
-        if(refreshCount > oldRefreshCount) {
-            log.info("Successfully refreshed packages");
-        } else {
-            log.warn("No refresh packages event seen after {} msec", waitMsec);
-        }
+        refresher.refreshPackagesAndWait(REFRESH_TIMEOUT_MSEC);
     }
     
     protected void processCommand(String [] cmd, PrintWriter out) {
@@ -57,13 +31,6 @@ public class RefreshPackagesTask extends TaskBase implements FrameworkListener {
         }
     }
 
-    @Override
-    public void frameworkEvent(FrameworkEvent event) {
-        if(event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
-            refreshCount++;
-        }
-    }
-    
     protected long getMsecBetweenCycles() {
         return waitMsec;
     }

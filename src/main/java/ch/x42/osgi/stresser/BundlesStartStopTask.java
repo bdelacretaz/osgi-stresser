@@ -20,10 +20,13 @@ public class BundlesStartStopTask extends TaskBase {
     private final static long START_WAIT_MSEC = 5000L;
     private final Set<String> ignoredBundlePatterns = new HashSet<String>();
     private final String mySymbolicName;
+    public static final long REFRESH_TIMEOUT_MSEC = 10000L;
+    private final PackagesRefresher refresher; 
     
     BundlesStartStopTask(BundleContext bundleContext) {
         super("bu", bundleContext);
         mySymbolicName = bundleContext.getBundle().getSymbolicName();
+        refresher = new PackagesRefresher(bundleContext);
         
         log.info("Using random seed {}", RANDOM_SEED);
         
@@ -96,8 +99,9 @@ public class BundlesStartStopTask extends TaskBase {
             }
         }
         
+        log.info("Cycle {} - refreshing packages", counter);
+        refresher.refreshPackagesAndWait(REFRESH_TIMEOUT_MSEC);
         log.info("Cycle {} ends, successfully stopped/started {} bundles", counter, toStop.size());
-        
     }
     
     private boolean waitForState(Bundle b, int expectedState, boolean expectEqual, long timeoutMsec) {

@@ -20,17 +20,19 @@ public abstract class TaskBase implements Runnable {
     }
     
     private STATE state;
-    protected final Random random;
     protected final BundleContext bundleContext;
     protected final String taskName;
+    protected final Waiter waiter;
+    protected final Random random;
     
     TaskBase(String taskName, BundleContext ctx) {
         this.bundleContext = ctx;
         this.taskName = taskName;
+        this.waiter = new Waiter();
+        this.random = new Random(42);
         state = STATE.paused;
         thread = new Thread(this, this.toString());
         thread.start();
-        random = new Random(42);
     }
     
     protected abstract void runOneCycle() throws Exception;
@@ -104,26 +106,11 @@ public abstract class TaskBase implements Runnable {
             if(state == STATE.running) {
                 final long toWait = getMsecBetweenCycles();
                 log.info("Waiting {} msec before next cycle...", toWait);
-                waitMsec(toWait);
+                waiter.waitMsec(toWait);
             } else if(state == STATE.oneShot) {
                 state = STATE.paused;
             }
         }
         log.info("{}: execution thread ends", this);
     }
-    
-    /** Wait a few msec. If msec is negative, random wait 
-     *  up to its positive value.
-     */
-    protected void waitMsec(long msec) {
-        if(msec < 0) {
-            msec = (long)(random.nextFloat() * -msec);
-        }
-        
-        try {
-            Thread.sleep(msec);
-        } catch(InterruptedException ignore) {
-        }
-    }
-
 }
