@@ -68,6 +68,7 @@ public class BundlesStartStopTask extends TaskBase {
             try {
                 if(b.getState() == Bundle.ACTIVE) {
                     b.stop();
+                    refresher.refreshPackagesAndWait(REFRESH_TIMEOUT_MSEC);
                 }
             } catch(Exception e) {
                 log.error("Could not stop " + b, e);
@@ -86,6 +87,7 @@ public class BundlesStartStopTask extends TaskBase {
         for(Bundle b : toStop) {
             try {
                 b.start();
+                refresher.refreshPackagesAndWait(REFRESH_TIMEOUT_MSEC);
             } catch(Exception e) {
                 log.error("Could not start " + b, e);
             }
@@ -99,8 +101,6 @@ public class BundlesStartStopTask extends TaskBase {
             }
         }
         
-        log.info("Cycle {} - refreshing packages", counter);
-        refresher.refreshPackagesAndWait(REFRESH_TIMEOUT_MSEC);
         log.info("Cycle {} ends, successfully stopped/started {} bundles", counter, toStop.size());
     }
     
