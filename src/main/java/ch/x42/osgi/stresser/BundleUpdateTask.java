@@ -64,4 +64,9 @@ public class BundleUpdateTask extends TaskBase {
     protected long getMsecBetweenCycles() {
             return waitMsec;
     }
+    
+    @Override
+    public String getCurrentOptions() {
+        return "bundle to update=" + SYMBOLIC_NAME;
+    }
 }

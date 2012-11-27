@@ -112,7 +112,10 @@ public class Activator implements BundleActivator, Runnable {
             }
             
             for(TaskBase tt : tasks.values()) {
-                out.println(tt + " state=" + tt.getState());
+                out.println(tt 
+                        + " " + tt.getState() 
+                        + " - cycle time " + tt.getMsecBetweenCycles() + " msec"
+                        + " - " + tt.getCurrentOptions());
             }
         } else {
             out.println("Empty command, cannot process");

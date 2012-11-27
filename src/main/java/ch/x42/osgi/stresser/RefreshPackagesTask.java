@@ -34,4 +34,9 @@ public class RefreshPackagesTask extends TaskBase{
     protected long getMsecBetweenCycles() {
         return waitMsec;
     }
+    
+    @Override
+    public String getCurrentOptions() {
+        return "max wait for packages refresh=" + REFRESH_TIMEOUT_MSEC;
+    }
 }

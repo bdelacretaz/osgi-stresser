@@ -48,5 +48,5 @@ public class PackagesRefresher implements FrameworkListener {
         if(event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
             refreshCount++;
         }
-    }   
+    }
 }

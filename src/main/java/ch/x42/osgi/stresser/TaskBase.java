@@ -62,6 +62,10 @@ public abstract class TaskBase implements Runnable {
         return taskName;
     }
     
+    String getCurrentOptions() {
+        return "";
+    }
+    
     Thread getThread() {
         return thread;
     }

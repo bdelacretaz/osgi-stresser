@@ -55,4 +55,9 @@ public class StopSingleBundleTask extends TaskBase {
     protected long getMsecBetweenCycles() {
             return waitMsec;
     }
+    
+    @Override
+    public String getCurrentOptions() {
+        return "bundle to stop and restart=" + SYMBOLIC_NAME;
+    }
 }

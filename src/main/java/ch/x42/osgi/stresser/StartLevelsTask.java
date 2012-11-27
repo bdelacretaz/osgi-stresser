@@ -2,6 +2,7 @@ package ch.x42.osgi.stresser;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.osgi.framework.BundleContext;
@@ -16,6 +17,7 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
     private int currentStartLevel = -1;
     private final long LEVEL_WAIT_MSEC = 10000;
     private final List<Integer> levels = new ArrayList<Integer>();
+    public static final String [] DEFAULT_LEVELS =  { "3", "45", "8", "19", "30" };
     
     StartLevelsTask(BundleContext bundleContext) {
         super("sl", bundleContext);
@@ -27,6 +29,8 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
             startLevel = (StartLevel)bundleContext.getService(ref);
             frameworkEvent(null);
         }
+        
+        setLevels(DEFAULT_LEVELS, 0);
         bundleContext.addFrameworkListener(this);
     }
     
@@ -52,21 +56,30 @@ public class StartLevelsTask extends TaskBase implements FrameworkListener {
     protected void processCommand(String [] cmd, PrintWriter out) {
         super.processCommand(cmd, out);
         if(cmd.length > 2) {
-            levels.clear();
-            for(int i=2; i < cmd.length; i++) {
-                final String val = cmd[i];
-                try {
-                    levels.add(Integer.parseInt(val));
-                } catch(NumberFormatException nfe) {
-                    out.println("Invalid start level '" + val + "', should be an Integer");
-                }
+            try {
+                setLevels(cmd, 2);
+            } catch(NumberFormatException nfe) {
+                out.println("Invalid start level in '" + Arrays.asList(cmd) 
+                        + "', start levels should be Integers");
             }
             out.println("List of start levels set to " + levels);
+        }
+    }
+    
+    private void setLevels(String [] values, int startIndex) throws NumberFormatException {
+        levels.clear();
+        for(int i=startIndex; i < values.length; i++) {
+            levels.add(Integer.parseInt(values[i]));
         }
     }
 
     @Override
     public void frameworkEvent(FrameworkEvent event) {
         currentStartLevel = startLevel.getStartLevel();
+    }
+    
+    @Override
+    public String getCurrentOptions() {
+        return "levels=" + levels;
     }
 }

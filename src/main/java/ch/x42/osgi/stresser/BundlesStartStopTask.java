@@ -125,4 +125,9 @@ public class BundlesStartStopTask extends TaskBase {
         }
         return false;
     }
+    
+    @Override
+    public String getCurrentOptions() {
+        return "ignored symbolic names (patterns)=" + ignoredBundlePatterns;
+    }
 }
